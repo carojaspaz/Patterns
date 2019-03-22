@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://jaxb.dev.java.net/array" name="TransactionMBISWebService" targetNamespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation>
+			Service: mbiswEBService
+			Version: 1.0
+			Owner: x. gastinois
+	  </wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" version="1.0">
+      <xs:simpleType name="submissionState">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="SUBMITTED" />
+          <xs:enumeration value="RESPONSES_AVAILABLE" />
+          <xs:enumeration value="COMPLETED" />
+          <xs:enumeration value="ERROR" />
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="RequestInfo">
+        <xs:sequence>
+          <xs:element minOccurs="1" name="requestId" type="xs:string" />
+          <xs:element minOccurs="0" name="userId" type="xs:string" />
+          <xs:element minOccurs="0" name="clientId" type="xs:string" />
+          <xs:element minOccurs="0" name="station" type="xs:string" />
+          <xs:element minOccurs="0" name="dateTime" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="NistResponse">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="requestId" type="xs:string" />
+          <xs:element minOccurs="0" name="responseDateTime" type="xs:string" />
+          <xs:element minOccurs="0" name="state" type="tns:submissionState" />
+        </xs:sequence>
+      </xs:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="submitNistFileResponse">
+    <wsdl:part name="state" type="tns:submissionState" />
+  </wsdl:message>
+  <wsdl:message name="getNistFileResponseResponse">
+    <wsdl:part name="responseInfo" type="tns:NistResponse" />
+    <wsdl:part name="nistFile" type="xsd:hexBinary" />
+  </wsdl:message>
+  <wsdl:message name="submitNistFileRequest">
+    <wsdl:part name="requestInfo" type="tns:RequestInfo" />
+    <wsdl:part name="nistFile" type="xsd:hexBinary" />
+  </wsdl:message>
+  <wsdl:message name="getNistFileResponseRequest">
+    <wsdl:part name="requestId" type="xsd:string" />
+  </wsdl:message>
+  <wsdl:portType name="Transaction">
+    <wsdl:documentation>Description of the MBISWebService transactions</wsdl:documentation>
+    <wsdl:operation name="submitNistFile">
+      <wsdl:input message="tns:submitNistFileRequest" />
+      <wsdl:output message="tns:submitNistFileResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="getNistFileResponse">
+      <wsdl:input message="tns:getNistFileResponseRequest" />
+      <wsdl:output message="tns:getNistFileResponseResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TransactionMBISWebServiceSoapBinding" type="tns:Transaction">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <wsdl:operation name="submitNistFile">
+      <soap:operation soapAction="" />
+      <wsdl:input>
+        <mime:multipartRelated>
+          <mime:part>
+            <soap:body use="literal" namespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" parts="RequestInfo" />
+          </mime:part>
+          <mime:part>
+            <mime:content part="nistFile" type="application/octet-stream" />
+          </mime:part>
+        </mime:multipartRelated>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" namespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" parts="state" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getNistFileResponse">
+      <soap:operation soapAction="" />
+      <wsdl:input>
+        <soap:body use="literal" namespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:multipartRelated>
+          <mime:part>
+            <soap:body use="literal" namespace="http://transaction.ws.adapter.edi.bodega.morphotrak.com/" parts="responseInfo" />
+          </mime:part>
+          <mime:part>
+            <mime:content part="nistFile" type="application/octet-stream" />
+          </mime:part>
+        </mime:multipartRelated>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TransactionMBISWebService">
+    <wsdl:port name="TransactionMBISWebPort" binding="tns:TransactionMBISWebServiceSoapBinding">
+      <soap:address location="http://172.28.46.205:8081/TransactionMBISWeb/" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
