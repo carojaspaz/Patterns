@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockservice", "Mockservice\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{E17D0720-310F-472A-AA25-5EDF50867081}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBuilder", "ImageBuilder\ImageBuilder.csproj", "{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{E17D0720-310F-472A-AA25-5EDF50867081}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E17D0720-310F-472A-AA25-5EDF50867081}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E17D0720-310F-472A-AA25-5EDF50867081}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

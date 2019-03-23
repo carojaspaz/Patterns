@@ -1,0 +1,29 @@
+
+------=_Part_17_5975184.1553366364831
+Content-Type: text/xml; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-ID: <rootpart@soapui.org>
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tran="http://transaction.ws.adapter.edi.bodega.morphotrak.com/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tran:getNistFileResponseResponse>
+           <responseInfo>
+            <!--Optional:-->
+            <requestId>201903231339</requestId>
+            <!--Optional:-->
+            <responseDateTime>03/23/2019 01:39:24 PM -0500</responseDateTime>
+            <!--Optional:-->
+            <state>ERROR</state>
+         </responseInfo>
+      </tran:getNistFileResponseResponse>
+   </soapenv:Body>
+</soapenv:Envelope>
+------=_Part_17_5975184.1553366364831
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: binary
+Content-ID: <Record_No_Found.nist>
+Content-Disposition: attachment; name="Record_No_Found.nist"
+
+1.001:1601.002:02001.003:112001.004:ERR1.005:201605181.006:21.007:CO/DIJIN1.008:CO/UT1.009:229400000564A1.010:XXXXXXXXXXX801.011:19.681.012:19.682.001:582.002:002.003:20002.074:201 ERROR: INVALID TCN
+------=_Part_17_5975184.1553366364831--

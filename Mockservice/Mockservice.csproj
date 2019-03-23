@@ -61,6 +61,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Nist\response.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="App.config" />
     <None Include="Connected Services\AfisDijin\Mockservice.AfisDijin.getNistFileResponseResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -76,6 +79,21 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Connected Services\AfisIdemia\TransactionMBISWebService.wsdl" />
+    <Content Include="Nist\CPS-123456789-ERR-AUTH.nist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Nist\CPS-123456789-NO-HIT-AUTH.nist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Nist\CPS-123456789-OK-AUTH.nist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Nist\CPS-ident_123456789-OK.nist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Nist\CPS-ident_123456789_NO_HIT-OK.nist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -108,5 +126,6 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
