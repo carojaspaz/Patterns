@@ -330,8 +330,17 @@ namespace Mockservice
         public string dateTime { get; set; }
     }
 
+    public static class LocalConstants
+    {
+        public const string regContentType = @"(Content-Type:)(.*)(?=[\r\n])";
+        public const string regSoapenv = @"(?=<soapenv)(.*?)(?<=Envelope>)";
+    }
+
     public class MultipartParser
     {
+        private bool _successXml = false;
+        private bool _successFileName = false;
+        private bool _successFileContent = false;
         public MultipartParser(Stream stream)
         {
             this.Parse(stream, Encoding.UTF8);
@@ -364,36 +373,50 @@ namespace Mockservice
                     }
                     string delimiter = content.Substring(0, content.IndexOf("\r\n"));
                     content = content.Substring(delimiterEndIndex + 2);
-                    // Look for Content-Type
-                    Regex re = new Regex(@"(?<=Content\-Type:)(.*?)(?=\r\n\r\n)");
-                    Match contentTypeMatch = re.Match(content);
-
-                    // Look for filename
-                    re = new Regex(@"(?<=filename\=\"")(.*?)(?=\"")");
-                    Match filenameMatch = re.Match(content);
-
-                    // Did we find the required values?
-                    if (contentTypeMatch.Success && filenameMatch.Success)
+                    
+                    if (!_successXml)
                     {
-                        // Set properties
-                        this.ContentType = contentTypeMatch.Value.Trim();
-                        this.Filename = filenameMatch.Value.Trim();
+                        // Look xml file                        
+                        RegexOptions options = RegexOptions.Singleline;
+                        Match m = Regex.Match(delimiter, LocalConstants.regSoapenv, options);
+                        if (m.Success)
+                        {
+                            XmlDocument xmlDocument = new XmlDocument();
+                            xmlDocument.LoadXml(delimiter);
+                            this._successXml = true;
+                        }                                                
+                    }
+                    else
+                    {
 
-                        // Get the start & end indexes of the file contents
-                        int startIndex = contentTypeMatch.Index + contentTypeMatch.Length + "\r\n\r\n".Length;
 
-                        byte[] delimiterBytes = encoding.GetBytes("\r\n" + delimiter);
-                        int endIndex = IndexOf(data, delimiterBytes, startIndex);
+                        // Look for filename
+                        Regex re = new Regex(@"(?<=name\=\"")(.*?)(?=\"")");
+                        Match filenameMatch = re.Match(content);
 
-                        int contentLength = endIndex - startIndex;
+                        // Did we find the required values?
+                        if (false)//filenameMatch.Success)
+                        {
+                            // Set properties
+                            //this.ContentType = contentTypeMatch.Value.Trim();
+                            this.Filename = filenameMatch.Value.Trim();
 
-                        // Extract the file contents from the byte array
-                        byte[] fileData = new byte[contentLength];
+                            // Get the start & end indexes of the file contents
+                            int startIndex = 0;// contentTypeMatch.Index + contentTypeMatch.Length + "\r\n\r\n".Length;
 
-                        Buffer.BlockCopy(data, startIndex, fileData, 0, contentLength);
+                            byte[] delimiterBytes = encoding.GetBytes("\r\n" + delimiter);
+                            int endIndex = IndexOf(data, delimiterBytes, startIndex);
 
-                        this.FileContents = fileData;
-                        this.Success = true;
+                            int contentLength = endIndex - startIndex;
+
+                            // Extract the file contents from the byte array
+                            byte[] fileData = new byte[contentLength];
+
+                            Buffer.BlockCopy(data, startIndex, fileData, 0, contentLength);
+
+                            this.FileContents = fileData;
+                            this.Success = true;
+                        }
                     }
                 }
             }
@@ -463,6 +486,8 @@ namespace Mockservice
             get;
             private set;
         }
+
+        public XDocument SoapResponse { get; private set; }
 
         public byte[] FileContents
         {
