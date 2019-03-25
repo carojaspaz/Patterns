@@ -182,20 +182,7 @@ namespace Mockservice
             {
                 using (WebResponse response = request.GetResponse())
                 {
-
-                    //var boundaryResponse = GetBoundary(response.Headers.GetValues("Content-Type"));
-                    //Console.WriteLine(boundaryResponse);
-                    //using (StreamReader rd = new StreamReader(response.GetResponseStream()))
-                    //{
-                    //    while (rd.Peek() > 0)
-                    //    {
-                    //        string line = rd.ReadLine();
-                    //        Console.WriteLine(line);
-                    //    }
-                    //    //string soapResult = rd.ReadToEnd();
-                    //    
-                    //    //Console.WriteLine(soapResult);
-                    //}
+                    
                     using (Stream webStream = response.GetResponseStream())
                     {
                         if (webStream != null)
@@ -204,14 +191,12 @@ namespace Mockservice
                             
                             if (parser.Success)
                             {
+                                Console.WriteLine(parser.SoapResponse.InnerXml);
+                                Console.WriteLine("--------------------------");
                                 Console.WriteLine(parser.Filename);
-                            }
-                            //using (StreamReader responseReader = new StreamReader(webStream))
-                            //{
-                            //    string responseStr = responseReader.ReadToEnd();
-                            //    byte[] byteResponse = Encoding.UTF8.GetBytes(responseStr);
-                            //    Console.WriteLine(responseStr);
-                            //}
+                                Console.WriteLine("--------------------------");
+                                Console.WriteLine(parser.FileContents);
+                            }                            
                         }
                     }
                 }
@@ -276,7 +261,8 @@ namespace Mockservice
         static HttpWebRequest CreateWebRequest(out string boundary, bool sendAttachment = false)
         {
             boundary = string.Empty;
-            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(@"http://172.28.45.207:8088/TransactionMBISWeb");
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(@"http://192.168.0.20:8088/TransactionMBISWeb");
+            //HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(@"http://172.28.45.207:8088/TransactionMBISWeb");
             //HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(@"http://172.28.46.205:8081/TransactionMBISWeb");
             webRequest.Headers.Add(@"SOAPAction: """"");            
             if (!sendAttachment)
@@ -333,7 +319,9 @@ namespace Mockservice
     public static class LocalConstants
     {
         public const string regContentType = @"(Content-Type:)(.*)(?=[\r\n])";
-        public const string regSoapenv = @"(?=<soapenv)(.*?)(?<=Envelope>)";
+        public const string regSoapenv = @"(?=<soapenv)(.*?)(?<=Envelope>)";        
+        public const string regFileName = @"(?<=name="")(.*)(?="")";
+        public const string regInitNist = @"(?=1\.001)(.*)";
     }
 
     public class MultipartParser
@@ -361,19 +349,21 @@ namespace Mockservice
             // Copy to a string for header parsing
             string content = encoding.GetString(data);
             bool readStream = true;
-            while (readStream)
+            int counter = 0;
+            while (readStream | !Success)
             {
                 // The first line should contain the delimiter            
-                int delimiterEndIndex = content.IndexOf("\r\n");                
+                int delimiterEndIndex = content.IndexOf("\r\n");
+                counter += delimiterEndIndex;
                 if (delimiterEndIndex > -1)
-                {
-                    if(delimiterEndIndex == content.Length || this.Success)
+                {                    
+                    string delimiter = content.Substring(0, content.IndexOf("\r\n"));
+                    content = content.Substring(delimiterEndIndex + 2);
+                    if (content.Length == 0)
                     {
                         readStream = false;
                     }
-                    string delimiter = content.Substring(0, content.IndexOf("\r\n"));
-                    content = content.Substring(delimiterEndIndex + 2);
-                    
+
                     if (!_successXml)
                     {
                         // Look xml file                        
@@ -381,45 +371,50 @@ namespace Mockservice
                         Match m = Regex.Match(delimiter, LocalConstants.regSoapenv, options);
                         if (m.Success)
                         {
-                            XmlDocument xmlDocument = new XmlDocument();
-                            xmlDocument.LoadXml(delimiter);
+                            SoapResponse = new XmlDocument();
+                            SoapResponse.LoadXml(delimiter);                            
                             this._successXml = true;
                         }                                                
                     }
                     else
                     {
-
-
-                        // Look for filename
-                        Regex re = new Regex(@"(?<=name\=\"")(.*?)(?=\"")");
-                        Match filenameMatch = re.Match(content);
-
-                        // Did we find the required values?
-                        if (false)//filenameMatch.Success)
+                        if (!_successFileName)
                         {
-                            // Set properties
-                            //this.ContentType = contentTypeMatch.Value.Trim();
-                            this.Filename = filenameMatch.Value.Trim();
-
-                            // Get the start & end indexes of the file contents
-                            int startIndex = 0;// contentTypeMatch.Index + contentTypeMatch.Length + "\r\n\r\n".Length;
-
-                            byte[] delimiterBytes = encoding.GetBytes("\r\n" + delimiter);
-                            int endIndex = IndexOf(data, delimiterBytes, startIndex);
-
-                            int contentLength = endIndex - startIndex;
-
-                            // Extract the file contents from the byte array
-                            byte[] fileData = new byte[contentLength];
-
-                            Buffer.BlockCopy(data, startIndex, fileData, 0, contentLength);
-
-                            this.FileContents = fileData;
-                            this.Success = true;
+                            RegexOptions options = RegexOptions.Multiline;
+                            Match m = Regex.Match(delimiter, LocalConstants.regFileName, options);
+                            if (m.Success)
+                            {
+                                Filename = m.Value;
+                                this._successFileName = true;
+                            }
                         }
-                    }
+                        else
+                        {
+                            if (!_successFileContent)
+                            {
+                                RegexOptions options = RegexOptions.Multiline;
+                                Match m = Regex.Match(delimiter, LocalConstants.regInitNist, options);
+                                if (m.Success)
+                                {                                                                
+                                    byte[] delimiterBytes = encoding.GetBytes(delimiter);
+                                    int endIndex = IndexOf(data, delimiterBytes, 0);
+
+                                    int contentLength = endIndex;
+
+                                    // Extract the file contents from the byte array
+                                    byte[] fileData = new byte[contentLength];
+
+                                    Buffer.BlockCopy(data, 0, fileData, 0, contentLength);
+
+                                    this.FileContents = fileData;
+                                    _successFileContent = true;
+                                }                                
+                            }
+                        }                                                
+                    }                    
                 }
-            }
+                Success = _successXml && _successFileName && _successFileContent;
+            }            
         }
 
         private int IndexOf(byte[] searchWithin, byte[] serachFor, int startIndex)
@@ -487,7 +482,7 @@ namespace Mockservice
             private set;
         }
 
-        public XDocument SoapResponse { get; private set; }
+        public XmlDocument SoapResponse { get; private set; }
 
         public byte[] FileContents
         {
