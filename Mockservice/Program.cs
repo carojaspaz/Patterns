@@ -46,8 +46,9 @@ namespace Mockservice
 
             //Console.WriteLine($"\n{SendingFileXml(getBytesContent(cki.KeyChar, out string fileName), fileName)}");
 
-            GetAttachment();
+            GetAttachment();            
 
+            Console.WriteLine("--------------------------");
             Console.WriteLine("\n-----------");
             Console.WriteLine("Finish.");
             Console.ReadKey();
@@ -170,7 +171,7 @@ namespace Mockservice
             List<object> par = new List<object>();            
             List<string> ele = new List<string>();
             Dictionary<string, string> keys = new Dictionary<string, string>();
-            keys.Add("requestId", "201903251128");
+            keys.Add("requestId", "201903251133");
             XDocument root = SerializeToXml(par, ele, keys,"getNistFileResponse");
             byte[] rq = Encoding.UTF8.GetBytes(root.ToString());
             HttpWebRequest request = CreateWebRequest(out string boundary, false);
@@ -188,10 +189,25 @@ namespace Mockservice
                         if (webStream != null)
                         {
                             MultipartParser parser = new MultipartParser(webStream);
-                            
-                            if (parser.Success)
+
+                            if (parser.SuccessWithError)
                             {
-                                Console.WriteLine(parser.SoapResponse.InnerXml);
+                                Console.WriteLine("Error");
+                                Console.WriteLine("--------------------------");
+                                XElement rootTmp = new XElement(stripNS(parser.SoapResponse.Root));
+                                XDocument doc = new XDocument(rootTmp);
+                                Console.WriteLine(doc.Root.Element("Body").Element("getNistFileResponseResponse").Element("responseInfo").Element("requestId"));
+                                //Serializer serializer = new Serializer();
+                                //var res = serializer.Deserialize<getNistFileResponseResponse>(parser.SoapResponse);
+                                //Console.WriteLine("--------------------------");
+                                //Console.WriteLine(res.requestInfo.dateTime);
+
+                            }
+                            else if (parser.Success)
+                            {
+                                Console.WriteLine("Success");
+                                Console.WriteLine("--------------------------");
+                                Console.WriteLine(parser.SoapResponse);
                                 Console.WriteLine("--------------------------");
                                 Console.WriteLine(parser.Filename);
                                 Console.WriteLine("--------------------------");
@@ -307,6 +323,19 @@ namespace Mockservice
         public string dateTime { get; set; }
     }
 
+    public class responseInfo
+    {
+        public string requestId { get; set; }
+        public DateTime responseDateTime { get; set; }
+        public string state { get; set; }        
+    }
+
+
+    public class getNistFileResponseResponse
+    {
+        public requestInfo requestInfo { get; set; }
+    }
+
     public static class LocalConstants
     {
         public const string regBoundary = @"(?=--)(.*)";
@@ -377,10 +406,11 @@ namespace Mockservice
                             RegexOptions options = RegexOptions.Singleline;
                             Match m = Regex.Match(delimiter, LocalConstants.regSoapenv, options);
                             if (m.Success)
-                            {
-                                SoapResponse = new XmlDocument();
-                                SoapResponse.LoadXml(delimiter);
+                            {                                
+                                TextReader tr = new StringReader(delimiter);
+                                SoapResponse = XDocument.Load(tr);                                
                                 this._successXml = true;
+                                SuccessWithError = true;
                             }
                         }
                         else
@@ -393,6 +423,7 @@ namespace Mockservice
                                 {
                                     Filename = m.Value;
                                     this._successFileName = true;
+                                    SuccessWithError = true;
                                 }
                             }
                             else
@@ -402,20 +433,18 @@ namespace Mockservice
                                     RegexOptions options = RegexOptions.Multiline;
                                     Match m = Regex.Match(delimiter, LocalConstants.regInitNist, options);
                                     if (m.Success)
-                                    {
-                                        byte[] delimiterBytes = encoding.GetBytes(delimiter);
-                                        int startIndex = lastCounterAttachment + 5;
-                                        int endIndex = data.Length - (_boundary.Length + 4);
+                                    {                                        
+                                        int startIndex = lastCounterAttachment + Filename.Length + 5;                                        
 
                                         // Extract the file contents from the byte array
-                                        int lengthFile = data.Length - (startIndex + endIndex);
+                                        int lengthFile = data.Length - (startIndex + _boundary.Length + 4);
                                         byte[] fileData = new byte[lengthFile];
 
                                         Buffer.BlockCopy(data, startIndex, fileData, 0, lengthFile);
-
-                                        //this.FileContents = fileData;
+                                        
                                         this.FileContents = fileData;
                                         _successFileContent = true;
+                                        SuccessWithError = false;
                                     }
                                 }
                             }
@@ -476,9 +505,9 @@ namespace Mockservice
         {
             get;
             private set;
-        }
+        }       
 
-        public string ContentType
+        public bool SuccessWithError
         {
             get;
             private set;
@@ -490,12 +519,36 @@ namespace Mockservice
             private set;
         }
 
-        public XmlDocument SoapResponse { get; private set; }
+        public XDocument SoapResponse { get; private set; }
 
         public byte[] FileContents
         {
             get;
             private set;
+        }
+    }
+
+    public class Serializer
+    {
+        public T Deserialize<T>(string input) where T : class
+        {
+            System.Xml.Serialization.XmlSerializer ser = new System.Xml.Serialization.XmlSerializer(typeof(T));
+
+            using (StringReader sr = new StringReader(input))
+            {
+                return (T)ser.Deserialize(sr);
+            }
+        }
+
+        public string Serialize<T>(T ObjectToSerialize)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(ObjectToSerialize.GetType());
+
+            using (StringWriter textWriter = new StringWriter())
+            {
+                xmlSerializer.Serialize(textWriter, ObjectToSerialize);
+                return textWriter.ToString();
+            }
         }
     }
 }
