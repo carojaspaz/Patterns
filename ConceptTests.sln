@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBuilder", "ImageBuilder\ImageBuilder.csproj", "{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchByFingerPrint", "SearchByFingerPrint\SearchByFingerPrint.csproj", "{3EA37A83-B678-4CF2-8EFB-3008B8C896DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A1D2CF4-B1A9-4676-B0E0-9BC79BA1345C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EA37A83-B678-4CF2-8EFB-3008B8C896DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EA37A83-B678-4CF2-8EFB-3008B8C896DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EA37A83-B678-4CF2-8EFB-3008B8C896DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EA37A83-B678-4CF2-8EFB-3008B8C896DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
