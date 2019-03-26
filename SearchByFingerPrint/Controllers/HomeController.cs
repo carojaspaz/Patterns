@@ -3,18 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using DPUruNet;
+using System.IO;
+using System.Drawing;
 
 namespace SearchByFingerPrint.Controllers
 {
     public class HomeController : Controller
     {
         public ActionResult Index()
-        {
-            //var _readers = ReaderCollection.GetReaders();
-            //List<SelectListItem> readers = _readers.Select(m => new SelectListItem { Text = m.Description.Name, Value = m.Description.SerialNumber }).ToList();
-            //ViewBag.readers = readers;
+        {           
             return View();
+        }
+
+        public ActionResult Image(string formatImage, byte[] array)
+        {            
+            byte[] img = System.IO.File.ReadAllBytes(Path.Combine(Server.MapPath("~/Images"), "Prueba.wsq"));
+            Wsq2Bmp.WsqDecoder decoder = new Wsq2Bmp.WsqDecoder();
+            var bMap = decoder.Decode(img);
+            var bitmapBytes = BitmapToBytes(bMap); //Convert bitmap into a byte array
+            return File(bitmapBytes, "image/jpeg"); //Return as file result
+        }
+
+        private static byte[] BitmapToBytes(Bitmap img)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                return stream.ToArray();
+            }
         }
 
         public ActionResult About()
@@ -32,9 +48,8 @@ namespace SearchByFingerPrint.Controllers
         }
     }
 
-    public class ReaderItem
+    public class FingerPrint
     {
-        public string Name { get; set; }
-        public string Serial { get; set; }
+        public byte[] print { get; set; }
     }
 }
