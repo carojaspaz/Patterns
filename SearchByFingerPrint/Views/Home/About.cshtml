@@ -1,7 +1,15 @@
-﻿@{
+﻿@model CLNist.Archivo.Nist
+
+@{
+    var base64 = Convert.ToBase64String(Model.RegistrosTipo14.First().DAT);
+    var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+}
+
+@{
     ViewBag.Title = "About";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
 
-<p>Use this area to provide additional information.</p>
+<h2>About</h2>
+
+<h3>Nombre:</h3> <p>@Model.RegistroTipo2.NAM</p>
+<h3>Imagen:</h3> <img src="@imgSrc" />

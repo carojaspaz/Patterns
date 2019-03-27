@@ -5,6 +5,10 @@ using System.Web;
 using System.Web.Mvc;
 using System.IO;
 using System.Drawing;
+using System.Net.Http;
+using System.Threading.Tasks;
+using CLNist.Archivo;
+using Newtonsoft.Json;
 
 namespace SearchByFingerPrint.Controllers
 {
@@ -15,13 +19,18 @@ namespace SearchByFingerPrint.Controllers
             return View();
         }
 
-        public ActionResult Image(string formatImage, byte[] array)
+        public ActionResult Image()
         {            
             byte[] img = System.IO.File.ReadAllBytes(Path.Combine(Server.MapPath("~/Images"), "Prueba.wsq"));
             Wsq2Bmp.WsqDecoder decoder = new Wsq2Bmp.WsqDecoder();
             var bMap = decoder.Decode(img);
             var bitmapBytes = BitmapToBytes(bMap); //Convert bitmap into a byte array
             return File(bitmapBytes, "image/jpeg"); //Return as file result
+        }
+
+        public ActionResult ImageFromByte(byte[] image)
+        {            
+            return File(image, "image/jpeg"); //Return as file result
         }
 
         private static byte[] BitmapToBytes(Bitmap img)
@@ -33,11 +42,23 @@ namespace SearchByFingerPrint.Controllers
             }
         }
 
-        public ActionResult About()
+        public async Task<ActionResult> About()
         {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
+            string url = "http://172.28.45.207:10100/api/v1/abis/getResponseNist/0/";
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                HttpResponseMessage responseMessage = await client.GetAsync(url);
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                    Nist nist = JsonConvert.DeserializeObject<CLNist.Archivo.Nist>(responseData);
+                    return View(nist);
+                }
+            }
+            return View();            
         }
 
         public ActionResult Contact()
