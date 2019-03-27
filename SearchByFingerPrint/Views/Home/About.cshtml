@@ -3,6 +3,8 @@
 @{
     var base64 = Convert.ToBase64String(Model.RegistrosTipo14.First().DAT);
     var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+    var base64pic = Convert.ToBase64String(Model.RegistrosTipo10.First().DAT);
+    var imgSrcpic = String.Format("data:image/gif;base64,{0}", base64pic);
 }
 
 @{
@@ -12,4 +14,5 @@
 <h2>About</h2>
 
 <h3>Nombre:</h3> <p>@Model.RegistroTipo2.NAM</p>
-<h3>Imagen:</h3> <img src="@imgSrc" />
+<h3>Foto:</h3> <img src="@imgSrcpic" width="200" height="200" />
+<h3>Huella:</h3> <img src="@imgSrc" width="200" height="200" />
