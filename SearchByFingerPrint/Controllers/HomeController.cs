@@ -12,6 +12,19 @@ using Newtonsoft.Json;
 
 namespace SearchByFingerPrint.Controllers
 {
+    enum DedoMano
+    {
+        ManoDerecha_Pulbar = 1,
+        Manoderecha_Indice,
+        ManoDerecha_Medio,
+        ManoDerecha_Anular,
+        ManoDerecha_Menique,
+        ManoIzquierda_Pulgar,
+        ManoIzquierda_Indice,
+        ManoIsquierda_Medio,
+        ManoIsquierda_Anular,
+        ManoIzquierda_Menique
+    }
     public class HomeController : Controller
     {
         public ActionResult Index()
@@ -45,6 +58,7 @@ namespace SearchByFingerPrint.Controllers
         public async Task<ActionResult> About()
         {
             string url = "http://172.28.45.207:10100/api/v1/abis/getResponseNist/0/";
+            ViewBag.GetFinger = new Func<string,string>(GetFinger);
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(url);
@@ -55,10 +69,41 @@ namespace SearchByFingerPrint.Controllers
                 {
                     var responseData = responseMessage.Content.ReadAsStringAsync().Result;
                     Nist nist = JsonConvert.DeserializeObject<CLNist.Archivo.Nist>(responseData);
+                    int dedo = int.Parse(nist.RegistrosTipo14.First().FGP);
+                    DedoMano dedoMano = (DedoMano)dedo;
+                    ViewBag.DedoMano = dedoMano.ToString();
                     return View(nist);
                 }
             }
             return View();            
+        }
+
+        public string GetFinger(string finger)
+        {
+            switch (finger)
+            {
+                case "1":
+                    return "Pulgar Mano Derecha";
+                case "2":
+                    return "Indice Mano Derecha";
+                case "3":
+                    return "Medio Mano Derecha";
+                case "4":
+                    return "Anular Mano Derecha";
+                case "5":
+                    return "Meñique Mano Derecha";
+                case "6":
+                    return "Pulgar Mano Izquierda";
+                case "7":
+                    return "Indice Mano Izquierda";
+                case "8":
+                    return "Medio Mano Izquierda";
+                case "9":
+                    return "Anular Mano Izquierda";
+                case "10":
+                    return "Meñique Mano Izquierda";
+            }
+            return string.Empty;
         }
 
         public ActionResult Contact()
