@@ -1,17 +1,22 @@
-﻿@{
+﻿@model CLNist.Archivo.Nist
+
+@{
+    var base64 = Convert.ToBase64String(Model.RegistrosTipo14.First().DAT);
+    var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+    var base64pic = Convert.ToBase64String(Model.RegistrosTipo10.First().DAT);
+    var imgSrcpic = String.Format("data:image/gif;base64,{0}", base64pic);
+}
+
+@{
     ViewBag.Title = "Contact";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
 
-<address>
-    One Microsoft Way<br />
-    Redmond, WA 98052-6399<br />
-    <abbr title="Phone">P:</abbr>
-    425.555.0100
-</address>
+<h2>Coontact</h2>
 
-<address>
-    <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
-    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-</address>
+<h3>Nombre:</h3> <p>@Model.RegistroTipo2.NAM</p>
+<h3>Foto:</h3> <img src="@imgSrcpic" width="200" height="200" />
+<h3>Dedo:</h3> @ViewBag.DedoMano
+<h3>Huella:</h3> <img src="@imgSrc" width="200" height="200" />
+
+<br />
+@Html.ActionLink("Ver Respuesta", "GetResponseNist", new { requestID = "0" })

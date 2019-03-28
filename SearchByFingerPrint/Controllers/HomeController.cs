@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using CLNist.Archivo;
 using Newtonsoft.Json;
+using System.Web.Helpers;
+using SearchByFingerPrint.Models;
 
 namespace SearchByFingerPrint.Controllers
 {
@@ -77,7 +79,7 @@ namespace SearchByFingerPrint.Controllers
             }
             return View();            
         }
-
+        
         public string GetFinger(string finger)
         {
             switch (finger)
@@ -106,11 +108,27 @@ namespace SearchByFingerPrint.Controllers
             return string.Empty;
         }
 
-        public ActionResult Contact()
+        public async Task<ActionResult> Contact(string requestId)
         {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
+            string url = $@"http://172.28.45.207:10100/api/v1/abis/getResponseFile/{requestId}/";
+            ViewBag.GetFinger = new Func<string, string>(GetFinger);
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                HttpResponseMessage responseMessage = await client.GetAsync(url);
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                    var nistResponse = JsonConvert.DeserializeObject<GetResponseFile>(responseData);
+                    //TO-DO: Evaluar el estado
+                    CLNist.Archivo.Nist nist = new Nist();
+                    nist.Leer(nistResponse.NistFile);
+                    return View(nist);
+                }
+            }
+            return View(new CLNist.Archivo.Nist());
         }
     }
 
